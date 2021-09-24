@@ -1,0 +1,972 @@
+---
+title: "harvey_assignment_2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Project 2
+
+The project spans chapter 4-8, and teaches how to store, retrieve, and change data values in a computer's memory. The project itself will mimic a deck of playing cards that can be shuffled and dealt. Skills that will be gained include:
+
+*Being able to save different types of data, like character strings and logical values
+*Being able to save a data set as a vector, matrix, array, list, or data frame
+*Being able to load and save your own data sets with R
+*Being able to extract individual values from a data set
+*Being able to change individual values within a data set
+*Being able to write logical tests
+*Being able to use R's missing-value symbol(NA)
+
+The project has four main parts: building the deck, writing functions that deal and shuffle, changing the point system to suit each game, and managing the state of the deck.
+
+## Building the Deck
+
+### Atomic Vectors
+An atomic vector is a simple vector of data. An atomic vector is created by grouping some values of data together with c.
+
+Example
+```{r}
+die <- c(1, 2, 3, 4, 5, 6)
+```
+```{r}
+die
+```
+You can use the is.vector method to test whether an object is an atomic vector. TRUE is returned if the object is an atomic vector and FALSE is returned otherwise.
+
+You can make an atomic vector with a single value. 
+
+Example
+```{r}
+five <- 5
+five
+```
+```{r}
+is.vector(five)
+```
+
+The length function returns the length of an atomic vector.
+
+Example
+```{r}
+length(five)
+```
+
+R recognizes six types of atomic vectors including doubles, integers, characters, logicals, complex, and raw. However, each atomic vector can only store one type of data. When creating a card deck, it will be necessary to use different types of atomic vectors to save different types of information. Each type of atomic vectors has a different convention when entering data.
+
+Example
+```{r}
+int <- 1L
+text <- "ace"
+
+int 
+text
+```
+Additionally, a vector can be created with more than one element, using the c function.
+
+Example
+```{r}
+int <- c(1L, 5L)
+text <- c("ace", "hearts")
+
+int
+text
+```
+The reason R uses multiple types of vectors is to perform calculations.
+
+Example
+```{r}
+sum(int)
+
+#sum(text)
+```
+#### Doubles
+A double vector store regular numbers. While double is the R term, numeric could be better term to use. The numbers can be either positive or negative, large or small. You can check what R type of object an object is with the typeof function.
+
+Example: create a double vector
+```{r}
+die <- c(1, 2, 3, 4, 5, 6)
+die
+```
+
+Example: use the typeof function
+```{r}
+typeof(die)
+```
+
+#### Integers
+Integer vectors store numbers that can be written without a decimal. An integer in R is created by typing a number, followed by an uppercase L. Without the L, integer numbers will be saves as doubles. 
+
+Example: create an integer vector
+```{r}
+int <- c(-1L, 2L, 4L)
+int
+```
+Use the typeof function
+```{r}
+typeof(int)
+```
+
+#### Characters
+Character vectors store small pieces of text. A character vector is created by typing a character or string of characters surrounded by quotes. Individual elements of a character vector are known as strings. A string can contain more than just letters; they can be created from numbers or symbols as well.
+
+Example: create a character vector
+```{r}
+text <- c("Hello", "World")
+text
+```
+Check the type of text
+```{r}
+typeof(text)
+typeof("Hello")
+```
+
+Exercise 5.1
+Spot the difference between a character string and a number. Which is which?
+```{r}
+a <- 1
+b <- "1"
+c <- "one"
+```
+
+a is a number since there are no quotes around the 1. b and c are both characters.
+
+Check
+```{r}
+typeof(a)
+typeof(b)
+typeof(c)
+```
+
+#### Logicals 
+Logical vectors store Boolean data as TRUE or FALSE. Logicals are useful in doing comparisons. Anytime TRUE or FALSE is typed in all caps, R assumes T and F are shorthand for TRUE and FALSE, respectively, unless they are defined elsewhere as a variable. 
+
+Example
+```{r}
+logic <- c(TRUE, FALSE, TRUE)
+logic
+```
+```{r}
+typeof(logic)
+```
+```{r}
+typeof(F)
+```
+
+#### Complex and Raw
+Complex and raw are two types of atomic vectors that are less practical than the ones previously mentioned. Complex vectors store complex numbers. They are created by adding an imaginary term to a number with i. Raw vectors store raw bytes of data. An empty raw vector of length n, is created by doing raw(n).
+
+Example: create a complex vector
+```{r}
+complex <- c(1 +1i, 1 + 2i, 1 + 3i)
+complex
+```
+```{r}
+typeof(complex)
+```
+Example: create a raw vector
+```{r}
+raw(3)
+```
+```{r}
+typeof(raw(3))
+```
+
+Exercise 5.2
+Create a vector that stores just the face names of the cards in royal flush, the ace, king, queen, jack, and ten of a single suit. Which type of vector would you use to save them?
+
+Solution: character
+
+```{r}
+hand <- c("ace", "king", "queen", "jack", "ten")
+hand
+```
+
+Check the solution
+```{r}
+typeof(hand)
+```
+### Attributes
+An attribute is a piece of information that can be attached to an atomic vector or any R object. An attribute can be though of as "metadata," meaning that it is a convenient place to put information associated with an object.The attributes method allows users to see which attributes an object has. 
+
+Example
+```{r}
+attributes(die)
+```
+Note that R uses "NULL" to represent an empty object. "NULL" is often returned when a function's value is undefined. 
+
+#### Names
+Names are one of the most common attribute given to an atomic vector. 
+
+Example: Look up the value of the names attribute of die
+```{r}
+names(die)
+```
+NULL means that die does not have a names attribute. 
+
+Example: create a names attribute to die
+```{r}
+names(die) <- c("one", "two", "three", "four", "five", "six")
+
+names(die)
+
+attributes(die)
+```
+R will display the names above the elements of die whenever a user looks at the vector; however, the names won't actually affect the values of the vector.
+
+```{r}
+die
+```
+```{r}
+die + 1
+```
+Example: change the names attribute
+```{r}
+names(die) <- c("uno", "dos", "tres", "cuatro", "cinco", "sies")
+
+die
+```
+Example: remove the names attribute
+```{r}
+names(die) <- NULL
+
+die
+```
+
+#### Dim
+Dim is another one of the most common attribute given to a vector. An atomic vector can be transformed into an n-dimensional array with dim. This is done by setting the dim attribute to a numeric vector of length n. The elements will be reorganized into n dimensions. Each dimensions will have as many rows or columns as the nth value of the dim vector specifies. 
+
+Example: reorganize die into a 2 x 3 matrix
+```{r}
+dim(die) <- c(2, 3)
+
+die
+```
+
+Example: reorganize die into a 3 x 2 matrix
+```{r}
+dim(die) <- c(3, 2)
+
+die
+```
+
+Note that R always uses the first value in dim as the number of rows and the second value for the number of columns. 
+
+### Matrices
+
+Exercise 5.3: Create a matrix that stores the name and suit of every card in a royal flush
+```{r}
+hand1 <- c("ace", "king", "queen", "jack", "ten", "spades", "spades", "spades", "spades",
+           "spades")
+
+matrix(hand1, nrow = 5)
+matrix(hand1, ncol = 2)
+dim(hand1) <- c(5, 2)
+```
+
+Exercise 5.4: Make a virtual playing card by combining "ace," "heart," and 1 into a vector. What type of atomic vector will result?
+
+Solution: no clue
+
+Check
+```{r}
+card <- c("ace", "hearts", 1)
+card
+```
+
+Exercise 5.5: Use a list to store a single playing card, like the ace of hearts, which has a point value of one.
+
+```{r}
+card <- list("ace", "hearts", 1)
+card
+```
+### Loading Data
+Import the deck.csv file by clicking the import dataset icon.
+THIS NEEDS DONE EVERY TIME YOU LEAVE R IF YOU WANT TO USE THESE VARIABLES!!!
+
+Look at the first few lines of data frame
+```{r}
+head(deck)
+```
+
+You can also create a data frame with the data.frame method, but it includes a lot of typing. You should avoid typing large data sets by hand when possible: It is very easy to accidentally have typos. 
+
+You can load the deck data frame by using the Import Dataset icon. 
+
+Save a copy of deck as a new .csv file.
+```{r}
+write.csv(deck, file="cards.csv", row.names=FALSE)
+```
+
+```{r}
+getwd()
+```
+
+## R Notation
+
+### Selecting Values
+
+Extract a value or set of values from a data frame by writing the data frame's name followed by a pair of hard brackets. When numbers are included in the brackets such as deck[i,j], the value of the deck that is in the ith row and the jth column will be returned. 
+```{r}
+deck[ , ]
+```
+```{r}
+deck[1, 1]
+```
+
+Also, more than one value can be extracted using a vector of positive integers.
+```{r}
+deck[1, c(1, 2, 3)]
+```
+R returns the values of deck that are in both the first row and the first, second, and third columns. These values will not be removed from deck, but a new set of values, which are copies of the original values, are returned. The new set can be saved to an R object.
+```{r}
+new <- deck[1, c(1, 2, 3)]
+new
+```
+
+Indexing can also be done with negative integers. R will returns every element except the elements in a negative index. 
+```{r}
+deck[-(2:52), 1:3]
+```
+
+A blank space can be used to extract every value in a dimension.
+```{r}
+deck[1, ]
+```
+
+You can supply a vector of TRUEs and FALSEs as your index, and R will match each TRUE and FALSE to a row in the data frame. R returns each row that corresponds to a TRUE.
+
+### Deal a Card
+
+Exercise 6.1: Return the first row of a data frame
+```{r}
+deal <- function(cards){
+  cards[1,]
+}
+```
+
+```{r}
+deal(deck)
+
+deal(deck)
+
+deal(deck)
+```
+
+### Shuffle the Deck
+Exercise 6.2: Create a shuffle function
+```{r}
+shuffle <- function(cards){
+  random <- sample(1:52, size = 52)
+  cards[random, ]
+}
+```
+
+```{r}
+deal(deck)
+```
+```{r}
+deck2 <- shuffle(deck)
+
+deal(deck2)
+```
+
+### Dollar Signs and Double Brackets
+You can also extract values from data frames and lists with the $ syntax. 
+
+Select a column from a data frame, by using the data frame's name and the column name separated by a $.
+```{r}
+deck$value
+```
+R returns all the values in the column as a vector. The $ notation is useful because you can store the variables of your data sets as columns in a data frame. 
+
+Find the mean and median of deck$value
+```{r}
+mean(deck$value)
+
+median(deck$value)
+```
+
+You can use the same notation with the elements of a list, as long as they have names.
+
+Make a list.
+```{r}
+lst <- list(numbers = c(1,2), logical=TRUE, strings=c("a", "b", "c"))
+lst
+```
+
+You can then subset the list.
+```{r}
+lst[1]
+```
+
+Doing it this way can be frustrating because many R functions, such as sum(), do not work with lists. This is where the $ notation is advantageous: the result is returned with no list structure around it.
+
+```{r}
+lst$numbers
+```
+
+Now, you can feed the results into a function
+```{r}
+sum(lst$numbers)
+```
+
+If the elements in the list do not have names, you can use two brackets to subset the list. This notation produces the same result as the $ notation.
+```{r}
+lst[[1]]
+```
+
+See the difference between the outputs.
+```{r}
+lst["numbers"]
+
+lst[["numbers"]]
+```
+
+## Modifying Values
+This section will change the point system of the deck three times, to simulate three different games: war, hearts, and blackjack. 
+
+Make a copy of deck that you can manipulate.
+```{r}
+deck2 <- deck
+```
+
+You can use R's notation system to modify values within an R object. Begin by describing the value(s) you wish to modify. Then, use the assignment operator (<-) to overwrite those values. R will updatea the selected values in the original object.
+
+Example
+```{r}
+vec <- c(0, 0, 0, 0, 0, 0)
+vec
+```
+
+Select the first value of vec
+```{r}
+vec[1]
+```
+
+Modify the first value of vec
+```{r}
+vec[1] <- 1000
+
+vec
+```
+
+Replace multiple values at once. This can always be done as long as the number of new values equals the number of selected values.
+```{r}
+vec[c(1, 3, 5)] <- c(1, 1, 1)
+vec
+
+vec[4:6] <- vec[4:6] + 1
+vec
+```
+
+Additionally, you can create values that do not yet exist in your object. R will expand the object to reflect the new values.
+
+```{r}
+vec[7] <- 0
+vec
+```
+
+Add new variables to your data set
+```{r}
+deck2$new <- 1:52
+
+head(deck2)
+```
+
+Remove columns from the data frame
+```{r}
+deck2$new <- NULL
+
+head(deck2)
+```
+
+In war, aces are the highest. Every card, besides the ace, gets the value that it already has in deck. To play war, the value of the ace needs to be changed from 1 to 14. As long as the deck hasn't been shuffled, the aces appear every 13 cards.
+
+Describe the aces with R's notation system
+```{r}
+deck2[c(13, 26, 39, 52), ]
+```
+
+You can single out just the values of the aces by subsetting the columns dimension of deck2, or you can subset the column vector deck2$value.
+```{r}
+deck2[c(13, 26, 39, 52), 3]
+
+deck2$value[c(13, 26, 39, 52)]
+```
+
+Now you can assign a new set of values to these old values. The set of new values must be the same size as the set of values they are replacing. 
+```{r}
+deck2$value[c(13, 26, 39, 52)] <- c(14, 14, 14, 14)
+
+#or
+
+deck2$value[c(13, 26, 39, 52)] <- 14
+```
+
+The new values appear inside deck2, instead of a modified copy of deck2.
+```{r}
+head(deck2, 13)
+```
+The same technique works whether you store your data in a vector, matrix, array, list, or data frame. Describe the values that you want to change with R's notation system, then assign over those value with R's assignment operator.
+
+```{r}
+deck3 <- shuffle(deck)
+
+head(deck3)
+```
+
+### Logical Subsetting
+You can select values with a vector of TRUEs and FALSEs. The vector must be the same length as the dimension that you want to subset. R will return every element that matches a TRUE.
+```{r}
+vec
+
+vec[c(FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE)]
+```
+
+Exercise 7.1: Extract the face column of deck2 and test whether each value is equal to ace. Use R to quickly count how many cards are equal to ace.
+```{r}
+deck2$face
+```
+
+Use the == operator to test whether each value is equal to ace. 
+```{r}
+deck2$face == "ace"
+```
+
+You can use sum to quickly count the number of TRUEs in the previous vector. 
+```{r}
+sum(deck2$face == "ace")
+```
+
+You can use this method to spot and change the aces in your deck, even if you've shuffled your cards. First, build a logical test that identifies the aces in your shuffled deck.
+```{r}
+deck3$face == "ace"
+```
+
+Then, use the test to single out the ace point values. Since the test returns a logical vector, you can use it as an index.
+```{r}
+deck3$value[deck3$face == "ace"] <- 14
+
+head(deck3)
+```
+Put logical subsetting to use with a new game: hearts. In hearts, every card has a value of zero, except cards in the suit of hearts and the queen of spades.
+```{r}
+deck4 <- deck
+
+deck4$value <- 0
+
+head(deck4, 13)
+```
+
+Exercise 7.2: Assign a value of 1 to every card in deck4 that has a suit of hearts.
+```{r}
+deck4$suit == "hearts"
+```
+```{r}
+deck4$value[deck4$suit == "hearts"]
+```
+```{r}
+deck4$value[deck4$suit == "hearts"] <- 1
+```
+```{r}
+deck4$value[deck4$suit == "hearts"]
+```
+In hearts the queen of spades is worth 13 points. What you want to find is all the cards that have both a face value equal to queen and a suit variable equal to spades. This can be done with a Boolean operator. Boolean operators combine multiple logical tests together into a single test. 
+
+### Boolean Operators
+There are six Boolean operators in R. 
+* &     Are both condition 1 and condition 2 true?
+* |     Is one or more of condition 1 and condition 2 true?
+* xor   Is exactly one of condition 1 and condition 2 true?
+* !     Is condition 1 false?
+* any   Are any of the conditions true?
+* all   Are all of the conditions true?
+
+Use a Boolean operator to locate the queen of spades in your deck.
+```{r}
+deck4$face == "queen" & deck4$suit == "spades"
+```
+
+Save the results of this test to its own object
+```{r}
+queenOfSpades <- deck4$face == "queen" & deck4$suit == "spades"
+```
+
+Use the test as an index to select the value of the queen of spades
+```{r}
+deck4[queenOfSpades, ]
+```
+```{r}
+deck4$value[queenOfSpades]
+```
+
+Update the Queen of Spades value
+```{r}
+deck4$value[queenOfSpades] <- 13
+
+deck4[queenOfSpades, ]
+```
+
+Exercise 7.3: Convert the sentences into tests written with R code. 
+* Is w positive?
+* Is x greater than 10 and less than 20?
+* Is object y the word February?
+* Is every value in z a day of the week?
+
+```{r}
+w <- c(-1, 0, 1)
+x <- c(5, 15)
+y <- "February"
+z <- c("Monday", "Tuesday", "Friday")
+
+# Solutions
+w > 0
+x > 10 & x < 20
+y == "February"
+all(z %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+```
+
+Consider one last game, blackjack, in which each number card has a value equal to its face value. Each face card has a value of 10 and each ace has a value of 11 or 1, depending on the final results of the game. 
+
+Begin with a fresh copy of deck
+```{r}
+deck5 <- deck
+
+head(deck5, 13)
+```
+
+Change the value of the face cards at one time
+```{r}
+facecard <- deck5$face %in% c("king", "queen", "jack")
+
+deck5[facecard, ]
+
+deck5$value[facecard] <- 10
+
+head(deck5, 13)
+```
+
+### Missing Information
+Missing information problems occur regularly in data science. R has a way to manage these missing values. The NA character is a special symbol that stands for "not available". It can be used as a placeholder for missing information.
+
+Example
+```{r}
+1 + NA
+```
+R does exactly what you expect it to do: it does not return one because there is a good chance the missing quantity is not zero. 
+
+Example
+```{r}
+NA == 1
+```
+Again, R produces and NA result because you do not know if it is equal to one. This can save you from making errors based on missing data. 
+
+Missing values can help you work around holes in your data sets, but they can also create problems. If, for example, you collect 1,000 observations and wish to take their average, if even one of the values is NA, then the result will be NA.
+
+Example
+```{r}
+c(NA, 1:50)
+
+mean(c(NA, 1:50))
+```
+
+R functions come with the optional argument, na.rm, which removes an NA. R will ignore NAs when it evaluates a function if you add the argument na.rm = TRUE. 
+
+Example
+```{r}
+mean(c(NA, 1:50), na.rm = TRUE)
+```
+
+R also supplies a function, is.na, that can test whether a value is an NA.
+
+Example
+```{r}
+is.na(NA)
+
+vec <- c(1, 2, 3, NA)
+is.na(vec)
+```
+
+Set all ace values to NA. This will remind you that you do not know the final value of each ace, and it will prevent you from accidentally scoring a hand that has an ace before you determine the ace's final value. 
+```{r}
+deck5$value[deck5$face == "ace"] <- NA
+
+head(deck5, 13)
+```
+## Environments
+The deck is now ready for the games mentioned previously. However, the shuffle and deal functions need fixed. 
+
+### Fixing the deal and shuffle functions
+Redefine deal at the command line
+```{r}
+deal <- function(){
+  deck[1, ]
+}
+```
+
+Notice that deal no longer takes an argument, and it calls the deck object, which lives in the global environment. 
+
+Exercise 8.1: Will R be able to find deck and return an answer when I call the new version of deal?
+
+Yes. deal will still work the same as before. R will run deal in a runtime environment that is created by the global environment.
+```{r}
+environment(deal)
+```
+```{r}
+deal()
+```
+When deal calls deck, R looks up the deck object. R's scoping rules will lead to the version of deck in the global environment. 
+
+Create another copy of deck and then remove the top card
+```{r}
+DECK <- deck
+
+deck <- deck[-1, ]
+
+head(deck, 3)
+```
+Now, add the code to deal. Deal saves and then returns the top card of deck
+```{r}
+deal <- function(){
+  card <- deck[1, ]
+  deck <- deck[-1, ]
+  card
+}
+```
+This code doesn't work because R will be in a runtime environment. Instead of overwriting the global copy of deck, deal will just create a slightly different copy of deck in its runtime environment. 
+
+Exercise 8.2: Rewrite the deck<-deck[-1, ] line of deal to assign deck[-1, ] to an object named deck in the global environment. 
+
+Solution
+```{r}
+deal <- function() {
+  card <- deck[1, ]
+  assign("deck", deck[-1, ], envir = globalenv())
+  card
+}
+```
+
+Now, deal will clean up the global copy of deck and we can deal cards as we would in real life. 
+```{r}
+deal()
+
+deal()
+
+deal()
+```
+
+Exercise 8.3: Rewrite shuffle so that it replaces the copy of deck that lives in the global environment with a shuffled version of DECK, the intact copy of deck that also lives in the global environment. The new version of shuffle should have no arguments and return no outputs.
+
+Solution
+```{r}
+shuffle <- function() {
+  random <- sample(1:52, size = 52)
+  assign("deck", DECK[random, ], envir=globalenv())
+}
+```
+
+The system finally works!
+```{r}
+shuffle()
+
+deal()
+
+deal()
+```
+
+However, the system requires deck and DECK to exist in the global environment. This poses this risk of deck getting modified or erased by accident. You can create a function that takes deck as an argument and saves a copy of deck as DECK. 
+```{r}
+setup <- function(deck) {
+  DECK <- deck
+  
+  DEAL <- function() {
+    card <- deck[1, ]
+    assign("deck", deck[-1, ], envir=globalenv())
+    card
+  }
+  
+  SHUFFLE <- function() {
+    random <- sample(1:52, size = 52)
+    assign("deck", DECK[random, ], envir=globalenv())
+  }
+  
+  list(deal = DEAL, shuffle = SHUFFLE)
+}
+
+cards <- setup(deck)
+```
+
+Save each of the elements of the list to a dedicated object in the global environment.
+```{r}
+deal <- cards$deal
+shuffle <- cards$shuffle
+```
+
+Now you can run deal and shuffle, just like before. Each objec contains the same code as the original deal and shuffle.
+```{r}
+deal
+
+shuffle
+```
+
+However, the original environment is no longer the global environment. Deal and Shuffle's origin environment is the runtime environment that R made when you ran setup. That's where R created DEAL and SHUFFLE, the functions copied into the new deal and shuffle.
+Example
+```{r}
+environment(deal)
+
+environment(shuffle)
+```
+
+Change it so that deal and shuffle work exclusively with the objects in the parent environment of their runtime environments. 
+```{r}
+setup <- function(deck) {
+  DECK <- deck
+  
+  DEAL <- function(){
+    card <- deck[1, ]
+    assign("deck", deck[-1, ], envir = parent.env(environment()))
+    card
+  }
+  
+  SHUFFLE <- function() {
+    random <- sample(1:52, size = 52)
+    assign("deck", DECK[random, ], envir = parent.env(environment()))
+  }
+  
+  list(deal = DEAL, shuffle = SHUFFLE)
+}
+
+cards <- setup(deck)
+deal <- cards$deal
+shuffle <- cards$shuffle
+```
+
+We FINALLY have a self-contained card game. You can delete or change the global copy of deck as much as you desire and still play cards. 
+
+Example: deal and shuffle use the protected copy of deck
+```{r}
+rm(deck)
+
+shuffle()
+
+deal()
+
+deal()
+```
+
+## Exercises
+
+1. Run the following code to create a numeric vector
+```{r}
+vec1 <- c(1, -7, 14, 12, 5, 7, -10, -1, 2, -3, 22, 1)
+```
+
+2. Use R code to yield the following:
+* a. the number of elements in vec1
+```{r}
+length(vec1)
+```
+* b. the sum of the elements in vec1
+```{r}
+sum(vec1)
+```
+* c. the positive elements in vec1
+```{r}
+vec1[vec1 > 0]
+```
+* d. the sum of the negative elements in vec1
+```{r}
+sum(vec1[vec1 < 0])
+```
+* e. change the third element of vec1 to 15
+```{r}
+vec1[3] <- 15
+vec1
+```
+* f. add two new elements, -21 and 13, to vec1 (without hard-coding the index value)
+```{r}
+vec1 <- c(vec1, -21, 13)
+vec1
+```
+
+3. Explain why the following code doesn't return 0.
+```{r}
+sqrt(2)^2 -2
+```
+The result is not 0 because the square root of 2 cannot be expressed exactly in 16 significant digits. So, R rounds the quantity to an expression close to, but not exactly 0.
+
+4. Run the following code to create a list:
+```{r}
+the_list <- list(nums = c(1, 4, -3, 2, -1),
+            words = c("carp", "red", "toad"),
+            logicals = c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE))
+```
+
+5. Use R code to yeild the following:
+* a. the third element of the numeric vector that is the first element in the_list (2 ways)
+```{r}
+the_list[[1]][[3]]
+
+the_list$nums[[3]]
+```
+* b. the second element of the_list, as a list
+```{r}
+the_list[2]
+
+typeof(the_list[2])
+```
+* c. the second element of the_list, as a character vector (2 ways)
+```{r}
+the_list[[2]]
+
+the_list$words
+
+typeof(the_list[[2]])
+
+typeof(the_list$words)
+```
+* d. the elements of the first element of the_list that are less than zero
+```{r}
+the_list$nums[the_list$nums < 0]
+```
+* e. the number of elements in the third element of the_list that are TRUE
+```{r}
+length(the_list$logicals[the_list$logicals == TRUE])
+```
+
+6. 
+Make sure deck is reloaded
+```{r}
+reload <- deck
+
+new_deck <- function() {
+  assign("reload", deck, envir = environment())
+  #environment
+}
+new_deck()
+```
+
+```{r}
+DEAL_HAND <- function(){
+  
+  SHUFFLE <- function() {
+    random <- sample(1:nrow(reload), size = nrow(reload))
+    assign("reload", reload[random, ], envir = environment(new_deck))
+    }
+  SHUFFLE()
+  
+  DEAL <- function(){
+    card <- reload[1:5, ]
+    df <- data.frame(card)
+    assign("reload", reload[-(1:5), ], envir = environment(new_deck))
+    df
+    }
+  DEAL()
+}
+
+DEAL_HAND()
+```
+
+
